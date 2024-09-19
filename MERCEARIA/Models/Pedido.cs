@@ -7,6 +7,5 @@
         public List<PedidoItem> Itens{ get; set; }
         public bool Pago { get; set; }  
         //public float ValorTotal()
-
     }
 }

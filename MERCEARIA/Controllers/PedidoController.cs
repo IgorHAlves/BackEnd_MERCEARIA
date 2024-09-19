@@ -1,0 +1,151 @@
+﻿using Blog.ViewModels;
+using MERCEARIA.Data;
+using MERCEARIA.Models;
+using MERCEARIA.ViewModels;
+using MERCEARIA.ViewModels.PedidoVM;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using System.Net.WebSockets;
+
+namespace MERCEARIA.Controllers
+{
+    [ApiController]
+    [Route("v1/pedidos")]
+    public class PedidosController : ControllerBase
+    {
+        [HttpGet("")]
+        public async Task<IActionResult> GetAsync([FromServices] MerceariaDataContext context)
+        {
+            try
+            {
+                var pedidos = await context.Pedidos.ToListAsync();
+                if (pedidos == null)
+                {
+                    return NotFound(new ResultViewModel<Pedido>("Não existem pedidos cadastrados"));
+                }
+
+                return Ok(new ResultViewModel<List<Pedido>>(pedidos));
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, new ResultViewModel<ClienteViewModel>("04x01 - Falha interna no servidor"));
+            }
+        }
+        [HttpGet("{id:int}")]
+        public async Task<IActionResult> GetAsync([FromServices] MerceariaDataContext context, [FromRoute] int id)
+        {
+            try
+            {
+                var pedido = await context.Pedidos.FirstOrDefaultAsync(x => x.Id == id);
+                if (pedido == null)
+                {
+                    return NotFound(new ResultViewModel<Produto>("Pedido não encontrado"));
+                }
+                return Ok(new ResultViewModel<Pedido>(pedido));
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, new ResultViewModel<Pedido>("04x02- Falha interna no servidor"));
+            }
+        }
+        [HttpPost("")]
+        public async Task<IActionResult> PostAsync([FromServices] MerceariaDataContext context, [FromQuery] CadastrarPedidoViewModel vm)
+        {
+            try
+            {
+                var cliente = context.Clientes.FirstOrDefault(x => x.Id == vm.IdCliente);
+                if (cliente == null)
+                    return NotFound(new ResultViewModel<Cliente>("Cliente cadastrado"));
+                var pedido = new Pedido()
+                {
+                    Cliente = cliente,
+                    Pago = vm.Pago
+                };
+                //conferir estoque
+                foreach (var itemVM in vm.Itens)
+                {
+                    var conferirEstoque = await context.Estoque.Select(x => new { x.Produto, x.Quantidade }).FirstOrDefaultAsync(x => x.Produto.Id == itemVM.IdProduto);
+                    if (conferirEstoque == null)
+                        return NotFound(new ResultViewModel<Estoque>("Não foi possível localizar esse produto no estoque"));
+                    if (itemVM.Quantidade > conferirEstoque.Quantidade)
+                        return BadRequest(new ResultViewModel<Estoque>($"Quantidade do Produto com id: {itemVM.IdProduto} indisponível no momento, a quantidade máxima é: {conferirEstoque.Quantidade}"));
+
+
+                    var item = new PedidoItem()
+                    {
+                        Pedido = pedido,
+                        Produto = await context.Produtos.FirstOrDefaultAsync(x => x.Id == itemVM.IdProduto),
+                        Quantidade = itemVM.Quantidade
+                    };
+
+                    pedido.Itens.Add(item);
+                }
+
+                //remover item do estoque
+                foreach (var itemVM in vm.Itens)
+                {
+                    var removerEstoque = await context.Estoque.FirstOrDefaultAsync(x => x.Produto.Id == itemVM.IdProduto);
+                    removerEstoque.Quantidade -= itemVM.Quantidade;
+                    context.Estoque.Update(removerEstoque);
+                }
+
+                await context.Pedidos.AddAsync(pedido);
+                await context.SaveChangesAsync();
+
+                return Created($"v1/pedidos/{pedido.Id}", new ResultViewModel<Pedido>(pedido));
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, new ResultViewModel<ClienteViewModel>("02x03 - Falha interna no servidor"));
+            }
+        }
+        //[HttpPut("({id:int})")]
+        //public async Task<IActionResult> PutAsync([FromServices] MerceariaDataContext context, [FromRoute] int id, [FromQuery] ProdutoViewModel vm)
+        //{
+        //    try
+        //    {
+        //        var produto = await context.Produtos.FirstOrDefaultAsync(x => x.Id == id);
+        //        if (produto == null)
+        //            return NotFound(new ResultViewModel<Produto>("Produto não encontrado"));
+
+        //        produto.NomeProduto = vm.NomeProduto;
+        //        produto.PrecoUnit = vm.PrecoUnit;
+
+        //        context.Produtos.Update(produto);
+        //        await context.SaveChangesAsync();
+
+        //        return Ok(new ResultViewModel<ProdutoViewModel>(vm));
+        //    }
+        //    catch (DbUpdateException)
+        //    {
+        //        return StatusCode(500, new ResultViewModel<ClienteViewModel>("01x04 - Não voi possivel alterar o produto"));
+        //    }
+        //    catch (Exception)
+        //    {
+        //        return StatusCode(500, new ResultViewModel<ClienteViewModel>("01x05 - Falha interna no servidor"));
+        //    }
+        //}
+        //[HttpDelete("{id:int}")]
+        //public async Task<IActionResult> DeleteAsync([FromServices] MerceariaDataContext context, [FromRoute] int id)
+        //{
+        //    try
+        //    {
+        //        var produto = await context.Produtos.FirstOrDefaultAsync(x => x.Id == id);
+        //        if (produto == null)
+        //            return NotFound(new ResultViewModel<Produto>("Produto não localizado"));
+        //        context.Produtos.Remove(produto);
+        //        await context.SaveChangesAsync();
+
+        //        return Ok(new ResultViewModel<Produto>(produto));
+        //    }
+        //    catch (DbUpdateException)
+        //    {
+        //        return StatusCode(500, new ResultViewModel<ClienteViewModel>("02x06 - Não voi possivel excluir o produto"));
+        //    }
+        //    catch (Exception)
+        //    {
+        //        return StatusCode(500, new ResultViewModel<ClienteViewModel>("02x07 - Falha interna no servidor"));
+        //    }
+        //}
+    }
+}
