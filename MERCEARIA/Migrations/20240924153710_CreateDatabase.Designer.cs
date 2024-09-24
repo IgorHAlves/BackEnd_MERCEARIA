@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MERCEARIA.Migrations
 {
     [DbContext(typeof(MerceariaDataContext))]
-    [Migration("20240910031515_CreateDatabase")]
+    [Migration("20240924153710_CreateDatabase")]
     partial class CreateDatabase
     {
         /// <inheritdoc />
@@ -102,7 +102,10 @@ namespace MERCEARIA.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("PedidoId")
+                    b.Property<int>("IdPedido")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("PedidoId")
                         .HasColumnType("int");
 
                     b.Property<int>("ProdutoId")
@@ -117,7 +120,7 @@ namespace MERCEARIA.Migrations
 
                     b.HasIndex("ProdutoId");
 
-                    b.ToTable("PedidoItem");
+                    b.ToTable("PedidosItens");
                 });
 
             modelBuilder.Entity("MERCEARIA.Models.Produto", b =>
@@ -164,19 +167,15 @@ namespace MERCEARIA.Migrations
 
             modelBuilder.Entity("MERCEARIA.Models.PedidoItem", b =>
                 {
-                    b.HasOne("MERCEARIA.Models.Pedido", "Pedido")
+                    b.HasOne("MERCEARIA.Models.Pedido", null)
                         .WithMany("Itens")
-                        .HasForeignKey("PedidoId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("PedidoId");
 
                     b.HasOne("MERCEARIA.Models.Produto", "Produto")
                         .WithMany()
                         .HasForeignKey("ProdutoId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("Pedido");
 
                     b.Navigation("Produto");
                 });

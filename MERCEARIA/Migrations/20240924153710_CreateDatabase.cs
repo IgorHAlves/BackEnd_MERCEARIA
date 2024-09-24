@@ -82,26 +82,26 @@ namespace MERCEARIA.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "PedidoItem",
+                name: "PedidosItens",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    PedidoId = table.Column<int>(type: "int", nullable: false),
+                    IdPedido = table.Column<int>(type: "int", nullable: false),
                     ProdutoId = table.Column<int>(type: "int", nullable: false),
-                    Quantidade = table.Column<int>(type: "int", nullable: false)
+                    Quantidade = table.Column<int>(type: "int", nullable: false),
+                    PedidoId = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_PedidoItem", x => x.Id);
+                    table.PrimaryKey("PK_PedidosItens", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_PedidoItem_Pedidos_PedidoId",
+                        name: "FK_PedidosItens_Pedidos_PedidoId",
                         column: x => x.PedidoId,
                         principalTable: "Pedidos",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "Id");
                     table.ForeignKey(
-                        name: "FK_PedidoItem_Produtos_ProdutoId",
+                        name: "FK_PedidosItens_Produtos_ProdutoId",
                         column: x => x.ProdutoId,
                         principalTable: "Produtos",
                         principalColumn: "Id",
@@ -114,19 +114,19 @@ namespace MERCEARIA.Migrations
                 column: "ProdutoId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_PedidoItem_PedidoId",
-                table: "PedidoItem",
-                column: "PedidoId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_PedidoItem_ProdutoId",
-                table: "PedidoItem",
-                column: "ProdutoId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Pedidos_ClienteId",
                 table: "Pedidos",
                 column: "ClienteId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PedidosItens_PedidoId",
+                table: "PedidosItens",
+                column: "PedidoId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PedidosItens_ProdutoId",
+                table: "PedidosItens",
+                column: "ProdutoId");
         }
 
         /// <inheritdoc />
@@ -136,7 +136,7 @@ namespace MERCEARIA.Migrations
                 name: "Estoque");
 
             migrationBuilder.DropTable(
-                name: "PedidoItem");
+                name: "PedidosItens");
 
             migrationBuilder.DropTable(
                 name: "Pedidos");

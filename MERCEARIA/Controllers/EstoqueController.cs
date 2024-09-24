@@ -95,7 +95,7 @@ namespace MERCEARIA.Controllers
             }
         }
         [HttpPut("({idProduto:int})")]
-        public async Task<IActionResult> PutAsync([FromServices] MerceariaDataContext context, [FromRoute] int idProduto, [FromQuery] CadastrarAlterarEstoqueViewModel vm)
+        public async Task<IActionResult> PutAsync([FromServices] MerceariaDataContext context, [FromQuery] CadastrarAlterarEstoqueViewModel vm)
         {
             try
             {
@@ -103,7 +103,7 @@ namespace MERCEARIA.Controllers
                 if (produto == null)
                     return NotFound(new ResultViewModel<Produto>("Produto não cadastrado"));
 
-                var estoque = await context.Estoque.FirstOrDefaultAsync(x => x.Id == idProduto);
+                var estoque = await context.Estoque.FirstOrDefaultAsync(x => x.Id == vm.IdProduto);
                 if (estoque == null)
                     return NotFound(new ResultViewModel<Produto>("Produto não cadastrado no estoque"));
 

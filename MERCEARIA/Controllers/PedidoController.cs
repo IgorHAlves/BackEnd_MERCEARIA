@@ -18,7 +18,7 @@ namespace MERCEARIA.Controllers
         {
             try
             {
-                var pedidos = await context.Pedidos.ToListAsync();
+                var pedidos = await context.Pedidos.Include(x => x.Cliente).Include(x => x.Itens).ThenInclude(x => x.Produto).ToListAsync();
                 if (pedidos == null)
                 {
                     return NotFound(new ResultViewModel<Pedido>("Não existem pedidos cadastrados"));
@@ -28,7 +28,7 @@ namespace MERCEARIA.Controllers
             }
             catch (Exception)
             {
-                return StatusCode(500, new ResultViewModel<ClienteViewModel>("04x01 - Falha interna no servidor"));
+                return StatusCode(500, new ResultViewModel<Pedido>("04x01 - Falha interna no servidor"));
             }
         }
         [HttpGet("{id:int}")]
@@ -36,7 +36,7 @@ namespace MERCEARIA.Controllers
         {
             try
             {
-                var pedido = await context.Pedidos.FirstOrDefaultAsync(x => x.Id == id);
+                var pedido = await context.Pedidos.Include(x => x.Cliente).Include(x=> x.Itens).ThenInclude(x => x.Produto).FirstOrDefaultAsync(x => x.Id == id);
                 if (pedido == null)
                 {
                     return NotFound(new ResultViewModel<Produto>("Pedido não encontrado"));
@@ -49,13 +49,14 @@ namespace MERCEARIA.Controllers
             }
         }
         [HttpPost("")]
-        public async Task<IActionResult> PostAsync([FromServices] MerceariaDataContext context, [FromQuery] CadastrarPedidoViewModel vm)
+        public async Task<IActionResult> PostAsync([FromServices] MerceariaDataContext context, [FromBody] CadastrarPedidoViewModel vm)
         {
             try
             {
-                var cliente = context.Clientes.FirstOrDefault(x => x.Id == vm.IdCliente);
+                var cliente = await context.Clientes.FirstOrDefaultAsync(x => x.Id == vm.IdCliente);
                 if (cliente == null)
-                    return NotFound(new ResultViewModel<Cliente>("Cliente cadastrado"));
+                    return NotFound(new ResultViewModel<Cliente>("Cliente não cadastrado"));
+
                 var pedido = new Pedido()
                 {
                     Cliente = cliente,
@@ -70,16 +71,21 @@ namespace MERCEARIA.Controllers
                     if (itemVM.Quantidade > conferirEstoque.Quantidade)
                         return BadRequest(new ResultViewModel<Estoque>($"Quantidade do Produto com id: {itemVM.IdProduto} indisponível no momento, a quantidade máxima é: {conferirEstoque.Quantidade}"));
 
+                    var produto = await context.Produtos.FirstOrDefaultAsync(x => x.Id == itemVM.IdProduto);
 
                     var item = new PedidoItem()
                     {
-                        Pedido = pedido,
-                        Produto = await context.Produtos.FirstOrDefaultAsync(x => x.Id == itemVM.IdProduto),
+                        IdPedido = pedido.Id,
+                        Produto = produto,
                         Quantidade = itemVM.Quantidade
                     };
 
-                    pedido.Itens.Add(item);
+                    await context.PedidosItens.AddAsync(item);
+
                 }
+
+                await context.Pedidos.AddAsync(pedido);
+
 
                 //remover item do estoque
                 foreach (var itemVM in vm.Itens)
@@ -89,9 +95,7 @@ namespace MERCEARIA.Controllers
                     context.Estoque.Update(removerEstoque);
                 }
 
-                await context.Pedidos.AddAsync(pedido);
                 await context.SaveChangesAsync();
-
                 return Created($"v1/pedidos/{pedido.Id}", new ResultViewModel<Pedido>(pedido));
             }
             catch (Exception)

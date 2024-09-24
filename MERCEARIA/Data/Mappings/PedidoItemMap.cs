@@ -18,9 +18,14 @@ namespace MERCEARIA.Data.Mappings
                 .UseIdentityColumn();
 
             //Propriedades chave estrangeira
-            builder.HasOne(x => x.Pedido)   
+            builder.Property(x => x.IdPedido)
+                .HasColumnName("IdPedido")
+                .IsRequired();
+
+            builder.HasOne<Pedido>()
                 .WithMany()
-                .HasConstraintName("FK_PedidoItem_Cliente")
+                .HasForeignKey(x => x.IdPedido)
+                .HasConstraintName("FK_Pedido_Item_Pedido")
                 .OnDelete(DeleteBehavior.Cascade);
 
             builder.HasOne(x => x.Produto)
