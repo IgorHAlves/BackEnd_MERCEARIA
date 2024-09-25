@@ -65,36 +65,36 @@ namespace MERCEARIA.Controllers
                 return StatusCode(500, new ResultViewModel<VisualizarEstoqueViewModel>("03x02- Falha interna no servidor"));
             }
         }
-        [HttpPost("")]
-        public async Task<IActionResult> PostAsync([FromServices] MerceariaDataContext context, [FromQuery] CadastrarAlterarEstoqueViewModel vm)
-        {
-            try
-            {
-                var produto = context.Produtos.FirstOrDefault(x => x.Id == vm.IdProduto);
-                if (produto == null)
-                    return NotFound(new ResultViewModel<Produto>("Produto não cadastrado"));
+        //[HttpPost("")]
+        //public async Task<IActionResult> PostAsync([FromServices] MerceariaDataContext context, [FromQuery] CadastrarAlterarEstoqueViewModel vm)
+        //{
+        //    try
+        //    {
+        //        var produto = context.Produtos.FirstOrDefault(x => x.Id == vm.IdProduto);
+        //        if (produto == null)
+        //            return NotFound(new ResultViewModel<Produto>("Produto não cadastrado"));
 
-                var estoques = await context.Estoque.FirstOrDefaultAsync(x => x.Produto.Id == vm.IdProduto);
-                if (estoques != null)
-                    return NotFound(new ResultViewModel<Produto>("Já existe esse produto cadastrado no estoque"));
+        //        var estoques = await context.Estoque.FirstOrDefaultAsync(x => x.Produto.Id == vm.IdProduto);
+        //        if (estoques != null)
+        //            return NotFound(new ResultViewModel<Produto>("Já existe esse produto cadastrado no estoque"));
 
-                var estoque = new Estoque()
-                {
-                    Id = 0,
-                    Produto = produto,
-                    Quantidade = vm.Quantidade
-                };
-                await context.Estoque.AddAsync(estoque);
-                await context.SaveChangesAsync();
+        //        var estoque = new Estoque()
+        //        {
+        //            Id = 0,
+        //            Produto = produto,
+        //            Quantidade = vm.Quantidade
+        //        };
+        //        await context.Estoque.AddAsync(estoque);
+        //        await context.SaveChangesAsync();
 
-                return Created($"v1/clientes/{estoque.Id}", new ResultViewModel<Estoque>(estoque));
-            }
-            catch (Exception)
-            {
-                return StatusCode(500, new ResultViewModel<ClienteViewModel>("03x03 - Falha interna no servidor"));
-            }
-        }
-        [HttpPut("({idProduto:int})")]
+        //        return Created($"v1/clientes/{estoque.Id}", new ResultViewModel<Estoque>(estoque));
+        //    }
+        //    catch (Exception)
+        //    {
+        //        return StatusCode(500, new ResultViewModel<ClienteViewModel>("03x03 - Falha interna no servidor"));
+        //    }
+        //}
+        [HttpPut("")]
         public async Task<IActionResult> PutAsync([FromServices] MerceariaDataContext context, [FromQuery] CadastrarAlterarEstoqueViewModel vm)
         {
             try
@@ -124,33 +124,33 @@ namespace MERCEARIA.Controllers
                 return StatusCode(500, new ResultViewModel<ClienteViewModel>("03x05 - Falha interna no servidor"));
             }
         }
-        [HttpDelete("{idProduto:int}")]
-        public async Task<IActionResult> DeleteAsync([FromServices] MerceariaDataContext context, [FromRoute] int idProduto)
-        {
-            try
-            {
-                var produto = context.Produtos.FirstOrDefault(x => x.Id == idProduto);
-                if (produto == null)
-                    return NotFound(new ResultViewModel<Produto>("Produto não cadastrado"));
+        //[HttpDelete("{idProduto:int}")]
+        //public async Task<IActionResult> DeleteAsync([FromServices] MerceariaDataContext context, [FromRoute] int idProduto)
+        //{
+        //    try
+        //    {
+        //        var produto = context.Produtos.FirstOrDefault(x => x.Id == idProduto);
+        //        if (produto == null)
+        //            return NotFound(new ResultViewModel<Produto>("Produto não cadastrado"));
 
-                var estoque = await context.Estoque.FirstOrDefaultAsync(x => x.Produto.Id == idProduto);
-                if (estoque == null)
-                    return NotFound(new ResultViewModel<Produto>("Produto não cadastrado no estoque"));
+        //        var estoque = await context.Estoque.FirstOrDefaultAsync(x => x.Produto.Id == idProduto);
+        //        if (estoque == null)
+        //            return NotFound(new ResultViewModel<Produto>("Produto não cadastrado no estoque"));
 
 
-                context.Estoque.Remove(estoque);
-                await context.SaveChangesAsync();
+        //        context.Estoque.Remove(estoque);
+        //        await context.SaveChangesAsync();
 
-                return Ok(new ResultViewModel<Estoque>(estoque));
-            }
-            catch (DbUpdateException)
-            {
-                return StatusCode(500, new ResultViewModel<ClienteViewModel>("03x06 - Não voi possivel excluir o produto do estoque"));
-            }
-            catch (Exception)
-            {
-                return StatusCode(500, new ResultViewModel<ClienteViewModel>("03x07 - Falha interna no servidor"));
-            }
-        }
+        //        return Ok(new ResultViewModel<Estoque>(estoque));
+        //    }
+        //    catch (DbUpdateException)
+        //    {
+        //        return StatusCode(500, new ResultViewModel<ClienteViewModel>("03x06 - Não voi possivel excluir o produto do estoque"));
+        //    }
+        //    catch (Exception)
+        //    {
+        //        return StatusCode(500, new ResultViewModel<ClienteViewModel>("03x07 - Falha interna no servidor"));
+        //    }
+        //}
     }
 }

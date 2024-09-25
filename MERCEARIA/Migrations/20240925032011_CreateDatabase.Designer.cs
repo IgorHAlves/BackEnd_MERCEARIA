@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MERCEARIA.Migrations
 {
     [DbContext(typeof(MerceariaDataContext))]
-    [Migration("20240924153710_CreateDatabase")]
+    [Migration("20240925032011_CreateDatabase")]
     partial class CreateDatabase
     {
         /// <inheritdoc />

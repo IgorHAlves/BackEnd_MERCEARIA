@@ -9,7 +9,7 @@ namespace MERCEARIA.Data.Mappings
         public void Configure(EntityTypeBuilder<PedidoItem> builder)
         {
             //Tabela
-            builder.ToTable("Pedido");
+            builder.ToTable("PedidoItem");
             //Chave primaria
             builder.HasKey(x => x.Id);
             //Identity
@@ -18,9 +18,9 @@ namespace MERCEARIA.Data.Mappings
                 .UseIdentityColumn();
 
             //Propriedades chave estrangeira
-            builder.Property(x => x.IdPedido)
-                .HasColumnName("IdPedido")
-                .IsRequired();
+            //builder.Property(x => x.IdPedido)
+            //    .HasColumnName("IdPedido")
+            //    .IsRequired();
 
             builder.HasOne<Pedido>()
                 .WithMany()
@@ -32,7 +32,6 @@ namespace MERCEARIA.Data.Mappings
                 .WithMany()
                 .HasConstraintName("FK_PedidoItem_Produto")
                 .OnDelete(DeleteBehavior.Cascade);
-
 
             builder.Property(x => x.Quantidade)
               .IsRequired()

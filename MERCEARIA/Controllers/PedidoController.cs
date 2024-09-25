@@ -56,6 +56,8 @@ namespace MERCEARIA.Controllers
                 var cliente = await context.Clientes.FirstOrDefaultAsync(x => x.Id == vm.IdCliente);
                 if (cliente == null)
                     return NotFound(new ResultViewModel<Cliente>("Cliente não cadastrado"));
+                if (cliente.Ativo == false) 
+                    return BadRequest(new ResultViewModel<Cliente>("O cliente está inativo"));
 
                 var pedido = new Pedido()
                 {
@@ -75,17 +77,20 @@ namespace MERCEARIA.Controllers
 
                     var item = new PedidoItem()
                     {
-                        IdPedido = pedido.Id,
                         Produto = produto,
                         Quantidade = itemVM.Quantidade
                     };
 
-                    await context.PedidosItens.AddAsync(item);
-
+                    pedido.Itens.Add(item);
+                    //await context.PedidosItens.AddAsync(item);
                 }
 
                 await context.Pedidos.AddAsync(pedido);
 
+                foreach ( var pedidoItem in pedido.Itens )
+                {
+                    pedidoItem.IdPedido = pedido.Id;
+                }
 
                 //remover item do estoque
                 foreach (var itemVM in vm.Itens)

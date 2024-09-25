@@ -31,7 +31,7 @@ namespace MERCEARIA.Data.Mappings
 
             builder.Property(x => x.Pago)
               .IsRequired()
-              .HasColumnName("Ativo")
+              .HasColumnName("Pago")
               .HasColumnType("boolean")
               .HasMaxLength(100);
         }
