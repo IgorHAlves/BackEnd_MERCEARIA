@@ -22,9 +22,9 @@ namespace MERCEARIA.Data.Mappings
             //    .HasColumnName("IdPedido")
             //    .IsRequired();
 
-            builder.HasOne<Pedido>()
-                .WithMany()
-                .HasForeignKey(x => x.IdPedido)
+            builder.HasOne(x => x.Pedido)
+                .WithMany(x => x.Itens)
+                .HasForeignKey(x => x.Pedido.Id)
                 .HasConstraintName("FK_Pedido_Item_Pedido")
                 .OnDelete(DeleteBehavior.Cascade);
 

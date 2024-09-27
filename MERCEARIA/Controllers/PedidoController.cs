@@ -24,11 +24,28 @@ namespace MERCEARIA.Controllers
                     return NotFound(new ResultViewModel<Pedido>("Não existem pedidos cadastrados"));
                 }
 
-                return Ok(new ResultViewModel<List<Pedido>>(pedidos));
+                var vm = new List<VisualizarPedidoViewModel>();
+
+                foreach(var pedido in pedidos)
+                {
+                    vm.Add(new VisualizarPedidoViewModel()
+                    {
+                        Cliente = pedido.Cliente,
+                        Itens = pedido.Itens.Select(x => new VisualizarPedidoItemViewModel()
+                        {
+                            IdProduto = x.Produto.Id,
+                            NomeProduto = x.Produto.NomeProduto,
+                            Quantidade = x.Quantidade
+                        }).ToList(),
+                        Pago = pedido.Pago
+                    });
+                }
+
+                return Ok(new ResultViewModel<List<VisualizarPedidoViewModel>>(vm));
             }
             catch (Exception)
             {
-                return StatusCode(500, new ResultViewModel<Pedido>("04x01 - Falha interna no servidor"));
+                return StatusCode(500, new ResultViewModel<VisualizarPedidoViewModel>("04x01 - Falha interna no servidor"));
             }
         }
         [HttpGet("{id:int}")]
@@ -41,11 +58,23 @@ namespace MERCEARIA.Controllers
                 {
                     return NotFound(new ResultViewModel<Produto>("Pedido não encontrado"));
                 }
-                return Ok(new ResultViewModel<Pedido>(pedido));
+
+                var vm = new VisualizarPedidoViewModel()
+                {
+                    Cliente = pedido.Cliente,
+                    Itens = pedido.Itens.Select(x => new VisualizarPedidoItemViewModel()
+                    {
+                        IdProduto = x.Produto.Id,
+                        NomeProduto = x.Produto.NomeProduto,
+                        Quantidade = x.Quantidade
+                    }).ToList()
+                };
+
+                return Ok(new ResultViewModel<VisualizarPedidoViewModel>(vm));
             }
             catch (Exception)
             {
-                return StatusCode(500, new ResultViewModel<Pedido>("04x02- Falha interna no servidor"));
+                return StatusCode(500, new ResultViewModel<VisualizarPedidoViewModel>("04x02- Falha interna no servidor"));
             }
         }
         [HttpPost("")]
@@ -77,6 +106,7 @@ namespace MERCEARIA.Controllers
 
                     var item = new PedidoItem()
                     {
+                        Pedido = pedido,
                         Produto = produto,
                         Quantidade = itemVM.Quantidade
                     };
@@ -87,11 +117,6 @@ namespace MERCEARIA.Controllers
 
                 await context.Pedidos.AddAsync(pedido);
 
-                foreach ( var pedidoItem in pedido.Itens )
-                {
-                    pedidoItem.IdPedido = pedido.Id;
-                }
-
                 //remover item do estoque
                 foreach (var itemVM in vm.Itens)
                 {
@@ -101,7 +126,19 @@ namespace MERCEARIA.Controllers
                 }
 
                 await context.SaveChangesAsync();
-                return Created($"v1/pedidos/{pedido.Id}", new ResultViewModel<Pedido>(pedido));
+
+                var vmRetorno = new VisualizarPedidoViewModel()
+                {
+                    Cliente = pedido.Cliente,
+                    Itens = pedido.Itens.Select(x => new VisualizarPedidoItemViewModel()
+                    {
+                        IdProduto = x.Produto.Id,
+                        NomeProduto = x.Produto.NomeProduto,
+                        Quantidade = x.Quantidade,
+                    }).ToList(),
+                };
+                
+                return Created($"v1/pedidos/{pedido.Id}", new ResultViewModel<VisualizarPedidoViewModel>(vmRetorno));
             }
             catch (Exception)
             {

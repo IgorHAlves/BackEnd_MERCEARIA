@@ -25,7 +25,7 @@ namespace MERCEARIA.Data.Mappings
 
             builder.HasMany(x => x.Itens)
               .WithOne()
-              .HasForeignKey(x => x.IdPedido)
+              .HasForeignKey(x => x.Pedido.Id)
               .HasConstraintName("FK_Pedido_PedidoItem")
               .OnDelete(DeleteBehavior.Cascade);
 

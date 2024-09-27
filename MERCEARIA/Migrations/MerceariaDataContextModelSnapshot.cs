@@ -99,10 +99,7 @@ namespace MERCEARIA.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("IdPedido")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("PedidoId")
+                    b.Property<int>("PedidoId")
                         .HasColumnType("int");
 
                     b.Property<int>("ProdutoId")
@@ -164,15 +161,19 @@ namespace MERCEARIA.Migrations
 
             modelBuilder.Entity("MERCEARIA.Models.PedidoItem", b =>
                 {
-                    b.HasOne("MERCEARIA.Models.Pedido", null)
+                    b.HasOne("MERCEARIA.Models.Pedido", "Pedido")
                         .WithMany("Itens")
-                        .HasForeignKey("PedidoId");
+                        .HasForeignKey("PedidoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("MERCEARIA.Models.Produto", "Produto")
                         .WithMany()
                         .HasForeignKey("ProdutoId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Pedido");
 
                     b.Navigation("Produto");
                 });
