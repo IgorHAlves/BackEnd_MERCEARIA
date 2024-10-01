@@ -7,7 +7,7 @@ configurado no Docker para facilitar a execução e manutenção do ambiente.
 
 - **Linguagem**: C#
 - **Framework**: .NET | Entity Framework Core | AspNetCore
-- - **Banco de Dados**: SQL Server
+- **Banco de Dados**: SQL Server
 - **Contêinerização**: Docker
 
 ## Funcionalidades
