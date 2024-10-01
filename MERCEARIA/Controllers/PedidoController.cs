@@ -142,56 +142,31 @@ namespace MERCEARIA.Controllers
             }
             catch (Exception)
             {
-                return StatusCode(500, new ResultViewModel<ClienteViewModel>("02x03 - Falha interna no servidor"));
+                return StatusCode(500, new ResultViewModel<ClienteViewModel>("04x03 - Falha interna no servidor"));
             }
         }
-        //[HttpPut("({id:int})")]
-        //public async Task<IActionResult> PutAsync([FromServices] MerceariaDataContext context, [FromRoute] int id, [FromQuery] ProdutoViewModel vm)
-        //{
-        //    try
-        //    {
-        //        var produto = await context.Produtos.FirstOrDefaultAsync(x => x.Id == id);
-        //        if (produto == null)
-        //            return NotFound(new ResultViewModel<Produto>("Produto não encontrado"));
 
-        //        produto.NomeProduto = vm.NomeProduto;
-        //        produto.PrecoUnit = vm.PrecoUnit;
+        [HttpDelete("{id:int}")]
+        public async Task<IActionResult> DeleteAsync([FromServices] MerceariaDataContext context, [FromRoute] int id)
+        {
+            try
+            {
+                var pedido = await context.Pedidos.FirstOrDefaultAsync(x => x.Id == id);
+                if (pedido == null)
+                    return NotFound(new ResultViewModel<Pedido>("Pedido não localizado"));
+                context.Pedidos.Remove(pedido);
+                await context.SaveChangesAsync();
 
-        //        context.Produtos.Update(produto);
-        //        await context.SaveChangesAsync();
-
-        //        return Ok(new ResultViewModel<ProdutoViewModel>(vm));
-        //    }
-        //    catch (DbUpdateException)
-        //    {
-        //        return StatusCode(500, new ResultViewModel<ClienteViewModel>("01x04 - Não voi possivel alterar o produto"));
-        //    }
-        //    catch (Exception)
-        //    {
-        //        return StatusCode(500, new ResultViewModel<ClienteViewModel>("01x05 - Falha interna no servidor"));
-        //    }
-        //}
-        //[HttpDelete("{id:int}")]
-        //public async Task<IActionResult> DeleteAsync([FromServices] MerceariaDataContext context, [FromRoute] int id)
-        //{
-        //    try
-        //    {
-        //        var produto = await context.Produtos.FirstOrDefaultAsync(x => x.Id == id);
-        //        if (produto == null)
-        //            return NotFound(new ResultViewModel<Produto>("Produto não localizado"));
-        //        context.Produtos.Remove(produto);
-        //        await context.SaveChangesAsync();
-
-        //        return Ok(new ResultViewModel<Produto>(produto));
-        //    }
-        //    catch (DbUpdateException)
-        //    {
-        //        return StatusCode(500, new ResultViewModel<ClienteViewModel>("02x06 - Não voi possivel excluir o produto"));
-        //    }
-        //    catch (Exception)
-        //    {
-        //        return StatusCode(500, new ResultViewModel<ClienteViewModel>("02x07 - Falha interna no servidor"));
-        //    }
-        //}
+                return Ok(new ResultViewModel<Pedido>(pedido));
+            }
+            catch (DbUpdateException)
+            {
+                return StatusCode(500, new ResultViewModel<ClienteViewModel>("04x05 - Não foi possivel excluir o pedido"));
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, new ResultViewModel<ClienteViewModel>("04x06 - Falha interna no servidor"));
+            }
+        }
     }
 }

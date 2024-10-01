@@ -91,7 +91,7 @@ namespace MERCEARIA.Controllers
             }
             catch (DbUpdateException)
             {
-                return StatusCode(500, new ResultViewModel<ClienteViewModel>("01x04 - Não voi possivel alterar o cliente"));
+                return StatusCode(500, new ResultViewModel<ClienteViewModel>("01x04 - Não foi possivel alterar o cliente"));
             }
             catch (Exception)
             {
